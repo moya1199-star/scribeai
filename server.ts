@@ -183,7 +183,7 @@ Analiza detenidamente esta grabaciÃ³n y realiza lo siguiente de manera multili
 Si por algÃºn motivo el audio estÃ¡ vacÃ­o, contiene solo ruido indescifrable o no es posible extraer voz, documenta de igual forma en un JSON vÃ¡lido explicando que no se detectÃ³ contenido verbal nÃ­tido.`;
 
     const response = await client.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.0-flash",
       contents: {
         parts: [
           audioPart,
