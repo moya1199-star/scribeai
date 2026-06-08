@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net - Deny-all fallback
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable global security helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // User Resource Match Rule
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) && isValidId(userId);
+    }
+
+    // Conversation Resource Match Rule
+    match /users/{userId}/conversations/{conversationId} {
+      allow read, write: if isOwner(userId) && isValidId(userId) && isValidId(conversationId);
+
+      // Sub-collection Chat Messages Match Rule
+      match /messages/{messageId} {
+        allow read, write: if isOwner(userId) && isValidId(userId) && isValidId(conversationId) && isValidId(messageId);
+      }
+    }
+  }
+}

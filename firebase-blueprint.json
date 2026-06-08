@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "User profile with identification details.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" }
+      },
+      "required": ["userId", "email"]
+    },
+    "conversation": {
+      "title": "Conversation",
+      "description": "Voice note metadata and transcribed speech analytics.",
+      "type": "object",
+      "properties": {
+        "conversationId": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "lastMessage": { "type": "string" },
+        "status": { "type": "string" },
+        "duration": { "type": "integer" },
+        "audioUrl": { "type": "string" },
+        "transcription": { "type": "object" },
+        "isLocalFallback": { "type": "boolean" }
+      },
+      "required": ["conversationId", "userId", "title", "createdAt", "updatedAt", "status"]
+    },
+    "message": {
+      "title": "Message",
+      "description": "Semantic chat messages between the user and ScribeAI assistant.",
+      "type": "object",
+      "properties": {
+        "messageId": { "type": "string" },
+        "conversationId": { "type": "string" },
+        "role": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "attachments": { "type": "array" },
+        "tokenUsage": { "type": "integer" }
+      },
+      "required": ["messageId", "conversationId", "role", "content", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "User account registry info."
+    },
+    "/users/{userId}/conversations/{conversationId}": {
+      "schema": "conversation",
+      "description": "Meeting voice notes and transcription aggregates owned by the user."
+    },
+    "/users/{userId}/conversations/{conversationId}/messages/{messageId}": {
+      "schema": "message",
+      "description": "Chat log logs associated with a specific voice note."
+    }
+  }
+}
