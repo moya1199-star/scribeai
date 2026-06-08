@@ -198,7 +198,7 @@ export default function App() {
   // Iframe and Storage Access detection
   useEffect(() => {
     // 1. Detect if running inside an iframe securely
-    // Local app - no iframe restrictions
+    // Local/production app - no iframe restrictions
     setIsInIframe(false);
     setHasStorageAccess(true);
     setIsCookieBlocked(false);
@@ -470,23 +470,20 @@ export default function App() {
 
       const mimeType = audioBlob.type || "audio/webm";
 
-      // Send audio to local Express backend (Gemini)
+      const apiBase2 = import.meta.env.VITE_API_URL || "";
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.webm");
-
-      const transcribeResponse = await fetch("/api/transcribe", {
+      const transcribeResponse = await fetch(`${apiBase2}/api/transcribe`, {
         method: "POST",
         body: formData,
       });
-
       if (!transcribeResponse.ok) {
         const errJson = await transcribeResponse.json().catch(() => ({}));
         throw new Error(errJson.error || `Error transcripcion (${transcribeResponse.status})`);
       }
-
       const transcriptionResult = await transcribeResponse.json();
 
-      const finalAudioUrl = localUrl;
+const finalAudioUrl = localUrl;
 
       const newNoteId = `note-${Date.now()}`;
       const defaultTitle = manualTitle.trim() || `Nota de voz #${notes.length + 1}`;
@@ -536,7 +533,7 @@ export default function App() {
       setManualTitle(""); // Reset manual title
       
       setErrorMsg(null);
-      // setIsCookieBlocked - disabled in local mode
+      // setIsCookieBlocked - disabled
     } finally {
       setIsProcessing(false);
     }

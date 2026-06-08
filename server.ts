@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import path from "path";
 import multer from "multer";
 import { GoogleGenAI, Type } from "@google/genai";
@@ -11,6 +11,7 @@ console.log("DEBUG GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "CARGADA" : "V
 console.log("DEBUG CWD:", process.cwd());
 
 const app = express();
+app.use((req, res, next) => { res.header("Access-Control-Allow-Origin", "*"); res.header("Access-Control-Allow-Headers", "*"); if (req.method === "OPTIONS") return res.sendStatus(200); next(); });
 const PORT = 3000;
 
 // Setup directories for persistence
@@ -69,7 +70,7 @@ function getGeminiClient(): GoogleGenAI {
   if (!aiClient) {
     const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
-  throw new Error("GEMINI_API_KEY no está definida en .env.local o .env");
+  throw new Error("GEMINI_API_KEY no estÃ¡ definida en .env.local o .env");
 }
     aiClient = new GoogleGenAI({
       apiKey: apiKey,
@@ -98,7 +99,7 @@ app.post("/api/notes", (req, res) => {
   try {
     const notesArray = req.body;
     if (!Array.isArray(notesArray)) {
-      return res.status(400).json({ error: "Datos inválidos. Se esperaba una lista." });
+      return res.status(400).json({ error: "Datos invÃ¡lidos. Se esperaba una lista." });
     }
     writeNotes(notesArray);
     res.json({ success: true, count: notesArray.length });
@@ -111,7 +112,7 @@ app.post("/api/notes", (req, res) => {
 app.post("/api/save-audio", upload.single("audio"), (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "No se proporcionó ningún archivo de audio." });
+      return res.status(400).json({ error: "No se proporcionÃ³ ningÃºn archivo de audio." });
     }
 
     const safeName = (req.file.originalname || "recording.webm")
@@ -124,7 +125,7 @@ app.post("/api/save-audio", upload.single("audio"), (req, res) => {
     res.json({ audioUrl: `/uploads/${filename}` });
   } catch (err: any) {
     console.error("Error saving static audio:", err);
-    res.status(500).json({ error: "No se pudo guardar la grabación de audio en el servidor." });
+    res.status(500).json({ error: "No se pudo guardar la grabaciÃ³n de audio en el servidor." });
   }
 });
 
@@ -132,7 +133,7 @@ app.post("/api/save-audio", upload.single("audio"), (req, res) => {
 app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "No se proporcionó ningún archivo de audio." });
+      return res.status(400).json({ error: "No se proporcionÃ³ ningÃºn archivo de audio." });
     }
 
     // Save audio statically so it is durable and playable after restarts/browser refeshes
@@ -171,15 +172,15 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
       },
     };
 
-    const promptText = `Eres un transcriptor experto con inteligencia artificial enfocado en análisis de grabaciones de voz, reuniones y notas de audio.
-Analiza detenidamente esta grabación y realiza lo siguiente de manera multilingüe y nativa:
-1. Detecta automáticamente el idioma principal o los idiomas hablados en la grabación (ej: "Español", "Inglés", "Español e Inglés", "Portugués", etc.).
-2. Genera una transcripción organizada de la conversación discriminando con precisión las voces participantes (Speaker Diarization).
-3. Utiliza etiquetas consistentes para cada participante, por ejemplo: "Hablante 1", "Hablante 2", etc. Si en la conversación un hablante revela su nombre explícitamente (ej: "Hola, soy Carlos" o "dime María"), siéntete libre de etiquetarlo con su nombre para una experiencia más humana (ej: "Carlos (Hablante 1)").
-4. Elabora un "summary" (resumen) estructurado de forma ejecutiva con un tono profesional, claro y amigable en español.
+    const promptText = `Eres un transcriptor experto con inteligencia artificial enfocado en anÃ¡lisis de grabaciones de voz, reuniones y notas de audio.
+Analiza detenidamente esta grabaciÃ³n y realiza lo siguiente de manera multilingÃ¼e y nativa:
+1. Detecta automÃ¡ticamente el idioma principal o los idiomas hablados en la grabaciÃ³n (ej: "EspaÃ±ol", "InglÃ©s", "EspaÃ±ol e InglÃ©s", "PortuguÃ©s", etc.).
+2. Genera una transcripciÃ³n organizada de la conversaciÃ³n discriminando con precisiÃ³n las voces participantes (Speaker Diarization).
+3. Utiliza etiquetas consistentes para cada participante, por ejemplo: "Hablante 1", "Hablante 2", etc. Si en la conversaciÃ³n un hablante revela su nombre explÃ­citamente (ej: "Hola, soy Carlos" o "dime MarÃ­a"), siÃ©ntete libre de etiquetarlo con su nombre para una experiencia mÃ¡s humana (ej: "Carlos (Hablante 1)").
+4. Elabora un "summary" (resumen) estructurado de forma ejecutiva con un tono profesional, claro y amigable en espaÃ±ol.
 5. Desarrolla una lista de "keyPoints" (puntos clave, decisiones u objetivos acordados).
 
-Si por algún motivo el audio está vacío, contiene solo ruido indescifrable o no es posible extraer voz, documenta de igual forma en un JSON válido explicando que no se detectó contenido verbal nítido.`;
+Si por algÃºn motivo el audio estÃ¡ vacÃ­o, contiene solo ruido indescifrable o no es posible extraer voz, documenta de igual forma en un JSON vÃ¡lido explicando que no se detectÃ³ contenido verbal nÃ­tido.`;
 
     const response = await client.models.generateContent({
       model: "gemini-3.5-flash",
@@ -196,11 +197,11 @@ Si por algún motivo el audio está vacío, contiene solo ruido indescifrable o 
           properties: {
             language: {
               type: Type.STRING,
-              description: "Idioma detectado automáticamente de la nota de voz (p. ej. 'Español', 'Multilingüe')."
+              description: "Idioma detectado automÃ¡ticamente de la nota de voz (p. ej. 'EspaÃ±ol', 'MultilingÃ¼e')."
             },
             summary: {
               type: Type.STRING,
-              description: "Resumen ejecutivo comprensivo del contenido o discusión en español."
+              description: "Resumen ejecutivo comprensivo del contenido o discusiÃ³n en espaÃ±ol."
             },
             keyPoints: {
               type: Type.ARRAY,
@@ -210,7 +211,7 @@ Si por algún motivo el audio está vacío, contiene solo ruido indescifrable o 
             speakers: {
               type: Type.ARRAY,
               items: { type: Type.STRING },
-              description: "Lista de todos los hablantes participantes identificados de manera única."
+              description: "Lista de todos los hablantes participantes identificados de manera Ãºnica."
             },
             segments: {
               type: Type.ARRAY,
@@ -219,16 +220,16 @@ Si por algún motivo el audio está vacío, contiene solo ruido indescifrable o 
                 properties: {
                   speaker: {
                     type: Type.STRING,
-                    description: "Hablante asignado a esta intervención (ej. 'Hablante 1', 'María')."
+                    description: "Hablante asignado a esta intervenciÃ³n (ej. 'Hablante 1', 'MarÃ­a')."
                   },
                   text: {
                     type: Type.STRING,
-                    description: "Texto exacto transcrito de la intervención de este hablante."
+                    description: "Texto exacto transcrito de la intervenciÃ³n de este hablante."
                   }
                 },
                 required: ["speaker", "text"]
               },
-              description: "Arreglo secuencial y cronológico de cada fragmento hablado."
+              description: "Arreglo secuencial y cronolÃ³gico de cada fragmento hablado."
             }
           },
           required: ["language", "summary", "keyPoints", "speakers", "segments"]
@@ -253,7 +254,7 @@ Si por algún motivo el audio está vacío, contiene solo ruido indescifrable o 
   } catch (error: any) {
     console.error("Transcription error on server:", error);
     return res.status(500).json({
-      error: error.message || "Ocurrió un error inesperado al procesar el audio."
+      error: error.message || "OcurriÃ³ un error inesperado al procesar el audio."
     });
   }
 });
@@ -273,18 +274,18 @@ app.post("/api/chat", async (req, res) => {
       ? segments.slice(0, 40).map((s: any) => `${s.speaker || "Hablante"}: ${s.text || ""}`).join("\n")
       : "";
 
-    const userContextPrompt = `Eres ScribeAI Assistant, un consultor de IA de nivel ejecutivo especializado en actas de reuniones y notas estratégicas de voz.
-Estás dando soporte interactivo a un usuario sobre su nota de voz grabada/analizada.
+    const userContextPrompt = `Eres ScribeAI Assistant, un consultor de IA de nivel ejecutivo especializado en actas de reuniones y notas estratÃ©gicas de voz.
+EstÃ¡s dando soporte interactivo a un usuario sobre su nota de voz grabada/analizada.
 
 --- CONTEXTO DE LA NOTA DE VOZ ---
 Resumen Ejecutivo:
 """
-${summary || "No hay resumen de reunión disponible."}
+${summary || "No hay resumen de reuniÃ³n disponible."}
 """
 
-Diálogos Transcritos (Muestra cronológica de intervenciones y hablantes):
+DiÃ¡logos Transcritos (Muestra cronolÃ³gica de intervenciones y hablantes):
 """
-${parsedSegments || "No hay segmentos hablados disponibles para esta grabación."}
+${parsedSegments || "No hay segmentos hablados disponibles para esta grabaciÃ³n."}
 """
 ---------------------------------
 
@@ -292,10 +293,10 @@ Pregunta o requerimiento del usuario:
 "${message}"
 
 Instrucciones de respuesta:
-1. Responde de forma directa, sumamente profesional, con un tono analítico, amigable y fluido en español.
-2. Basate prioritariamente en el Resumen y Diálogos proporcionados arriba.
+1. Responde de forma directa, sumamente profesional, con un tono analÃ­tico, amigable y fluido en espaÃ±ol.
+2. Basate prioritariamente en el Resumen y DiÃ¡logos proporcionados arriba.
 3. Si la pregunta busca que redactes un entregable (como un correo, minuta formal, resumen adaptado, mensaje de Slack), hazlo con una plantilla elegante y bien estructurada.
-4. Usa negritas y Markdown limpio para que el texto sea escaneable y estético en la ventana de chat del Cockpit. ¿Estás listo?`;
+4. Usa negritas y Markdown limpio para que el texto sea escaneable y estÃ©tico en la ventana de chat del Cockpit. Â¿EstÃ¡s listo?`;
 
     const result = await client.models.generateContent({
       model: "gemini-3.5-flash",
@@ -321,7 +322,7 @@ Instrucciones de respuesta:
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error("Global Express Error Handler:", err);
   res.status(err.status || err.statusCode || 500).json({
-    error: err.message || "Ocurrió un error interno en el servidor."
+    error: err.message || "OcurriÃ³ un error interno en el servidor."
   });
 });
 
