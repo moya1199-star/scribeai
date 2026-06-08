@@ -299,7 +299,7 @@ Instrucciones de respuesta:
 4. Usa negritas y Markdown limpio para que el texto sea escaneable y estÃ©tico en la ventana de chat del Cockpit. Â¿EstÃ¡s listo?`;
 
     const result = await client.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.0-flash",
       contents: userContextPrompt,
     });
 
