@@ -1,0 +1,9 @@
+﻿services:
+  - type: web
+    name: scribeai-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npx tsx server.ts
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
