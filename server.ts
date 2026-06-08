@@ -12,6 +12,8 @@ console.log("DEBUG CWD:", process.cwd());
 
 const app = express();
 app.use((req, res, next) => { res.header("Access-Control-Allow-Origin", "*"); res.header("Access-Control-Allow-Headers", "*"); if (req.method === "OPTIONS") return res.sendStatus(200); next(); });
+app.use((req, res, next) => { res.setTimeout(300000); next(); }); // 5 min timeout para audios largos
+
 const PORT = 3000;
 
 // Setup directories for persistence
