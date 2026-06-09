@@ -510,12 +510,10 @@ const finalAudioUrl = localUrl;
       setSelectedNote(newNote);
       setManualTitle(""); // Reset manual title
 
-    } catch (err: any) {
-  console.error("Error en processAudioPayload:", err);
-  setErrorMsg(`Error al transcribir: ${err.message}`); // muestra el error real
-  setIsProcessing(false);
-  return; // NO caer al mock
-} finally {
+   } catch (err: any) {
+      console.error("Error en processAudioPayload:", err);
+      setErrorMsg(`Error al transcribir: ${err.message}`);
+    } finally {
       setIsProcessing(false);
     }
       
