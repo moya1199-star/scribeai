@@ -473,10 +473,14 @@ export default function App() {
       const apiBase2 = import.meta.env.VITE_API_URL || "";
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.webm");
-      const transcribeResponse = await fetch(`${apiBase2}/api/transcribe`, {
-        method: "POST",
-        body: formData,
-      });
+      const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 min
+const transcribeResponse = await fetch(`${apiBase2}/api/transcribe`, {
+  method: "POST",
+  body: formData,
+  signal: controller.signal,
+});
+clearTimeout(timeoutId);
       if (!transcribeResponse.ok) {
         const errJson = await transcribeResponse.json().catch(() => ({}));
         throw new Error(errJson.error || `Error transcripcion (${transcribeResponse.status})`);
@@ -507,7 +511,11 @@ const finalAudioUrl = localUrl;
       setManualTitle(""); // Reset manual title
 
     } catch (err: any) {
-      console.warn("Error en processAudioPayload, aplicando motor local de respaldo:", err);
+  console.error("Error en processAudioPayload:", err);
+  setErrorMsg(`Error al transcribir: ${err.message}`); // muestra el error real
+  setIsProcessing(false);
+  return; // NO caer al mock
+}
       
       const simulatedTitle = manualTitle.trim() || `Nota de voz #${notes.length + 1}`;
       const simulatedResult = generateSmartMockTranscription(simulatedTitle, duration);
