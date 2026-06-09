@@ -97,6 +97,18 @@ app.get("/api/notes", (req, res) => {
 });
 
 // POST save entire notes database
+app.get("/api/models", async (req, res) => {
+  try {
+    const client = getGeminiClient();
+    const models = await client.models.list();
+    res.json(models);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST save entire notes database
+app.post("/api/notes", (req, res) => {
 app.post("/api/notes", (req, res) => {
   try {
     const notesArray = req.body;
