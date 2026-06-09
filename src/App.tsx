@@ -515,7 +515,9 @@ const finalAudioUrl = localUrl;
   setErrorMsg(`Error al transcribir: ${err.message}`); // muestra el error real
   setIsProcessing(false);
   return; // NO caer al mock
-}
+} finally {
+      setIsProcessing(false);
+    }
       
       const simulatedTitle = manualTitle.trim() || `Nota de voz #${notes.length + 1}`;
       const simulatedResult = generateSmartMockTranscription(simulatedTitle, duration);
