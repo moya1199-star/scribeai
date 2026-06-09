@@ -185,7 +185,7 @@ Analiza detenidamente esta grabaciÃ³n y realiza lo siguiente de manera multili
 Si por algÃºn motivo el audio estÃ¡ vacÃ­o, contiene solo ruido indescifrable o no es posible extraer voz, documenta de igual forma en un JSON vÃ¡lido explicando que no se detectÃ³ contenido verbal nÃ­tido.`;
 
     const response = await client.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-1.5-flash-latest",
       contents: {
         parts: [
           audioPart,
@@ -301,7 +301,7 @@ Instrucciones de respuesta:
 4. Usa negritas y Markdown limpio para que el texto sea escaneable y estÃ©tico en la ventana de chat del Cockpit. Â¿EstÃ¡s listo?`;
 
     const result = await client.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-1.5-flash-latest",
       contents: userContextPrompt,
     });
 
