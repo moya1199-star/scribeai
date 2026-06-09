@@ -109,8 +109,7 @@ app.get("/api/models", async (req, res) => {
 
 // POST save entire notes database
 app.post("/api/notes", (req, res) => {
-app.post("/api/notes", (req, res) => {
-  try {
+try {
     const notesArray = req.body;
     if (!Array.isArray(notesArray)) {
       return res.status(400).json({ error: "Datos invÃ¡lidos. Se esperaba una lista." });
