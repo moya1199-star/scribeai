@@ -452,107 +452,42 @@ export default function App() {
     }
   };
 
-  // Process the raw audio payload via Claude API directly (no backend needed)
+  // Process the raw audio payload
   const processAudioPayload = async (audioBlob: Blob, localUrl: string, duration: number) => {
-  setIsProcessing(true);
-  setErrorMsg(null);
-  setIsCookieBlocked(false);
-  pendingPayloadRef.current = { localUrl, duration };
+    setIsProcessing(true);
+    setErrorMsg(null);
+    setIsCookieBlocked(false);
+    pendingPayloadRef.current = { localUrl, duration };
 
-  try {
-    const base64Audio = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(audioBlob);
-    });
-
-    const mimeType = audioBlob.type || "audio/webm";
-    const apiBase2 = import.meta.env.VITE_API_URL || "";
-    const formData = new FormData();
-    formData.append("audio", audioBlob, "recording.webm");
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 300000);
-    const transcribeResponse = await fetch(`${apiBase2}/api/transcribe`, {
-      method: "POST",
-      body: formData,
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (!transcribeResponse.ok) {
-      const errJson = await transcribeResponse.json().catch(() => ({}));
-      throw new Error(errJson.error || `Error transcripcion (${transcribeResponse.status})`);
-    }
-
-    const transcriptionResult = await transcribeResponse.json();
-    const newNoteId = `note-${Date.now()}`;
-    const defaultTitle = manualTitle.trim() || `Nota de voz #${notes.length + 1}`;
-
-    const newNote: VoiceNote = {
-      id: newNoteId,
-      title: defaultTitle,
-      createdAt: new Date().toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" }),
-      duration: duration || 12,
-      audioUrl: localUrl,
-      transcription: transcriptionResult,
-    };
-
-    saveNoteToFirestore(newNote).catch(err => {
-      console.warn("Advertencia: No se pudo autosalvar en la nube:", err);
-    });
-    setSelectedNote(newNote);
-    setManualTitle("");
-
-  } catch (err: any) {
-    console.error("Error en processAudioPayload:", err);
-    setErrorMsg(`Error al transcribir: ${err.message}`);
-  } finally {
-    setIsProcessing(false);
-  }
-};
-      // Convert audio blob to base64 for Claude API
-      const base64Audio = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(audioBlob);
-      });
-
-      const mimeType = audioBlob.type || "audio/webm";
-
+    try {
       const apiBase2 = import.meta.env.VITE_API_URL || "";
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.webm");
+
       const controller = new AbortController();
-const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 min
-const transcribeResponse = await fetch(`${apiBase2}/api/transcribe`, {
-  method: "POST",
-  body: formData,
-  signal: controller.signal,
-});
-clearTimeout(timeoutId);
+      const timeoutId = setTimeout(() => controller.abort(), 300000);
+      const transcribeResponse = await fetch(`${apiBase2}/api/transcribe`, {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
       if (!transcribeResponse.ok) {
         const errJson = await transcribeResponse.json().catch(() => ({}));
         throw new Error(errJson.error || `Error transcripcion (${transcribeResponse.status})`);
       }
+
       const transcriptionResult = await transcribeResponse.json();
-
-const finalAudioUrl = localUrl;
-
       const newNoteId = `note-${Date.now()}`;
       const defaultTitle = manualTitle.trim() || `Nota de voz #${notes.length + 1}`;
-      
+
       const newNote: VoiceNote = {
         id: newNoteId,
         title: defaultTitle,
-        createdAt: new Date().toLocaleString("es-ES", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }),
+        createdAt: new Date().toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" }),
         duration: duration || 12,
-        audioUrl: finalAudioUrl,
+        audioUrl: localUrl,
         transcription: transcriptionResult,
       };
 
@@ -560,40 +495,11 @@ const finalAudioUrl = localUrl;
         console.warn("Advertencia: No se pudo autosalvar en la nube:", err);
       });
       setSelectedNote(newNote);
-      setManualTitle(""); // Reset manual title
+      setManualTitle("");
 
-   } catch (err: any) {
+    } catch (err: any) {
       console.error("Error en processAudioPayload:", err);
       setErrorMsg(`Error al transcribir: ${err.message}`);
-    } finally {
-      setIsProcessing(false);
-    }
-      
-      const simulatedTitle = manualTitle.trim() || `Nota de voz #${notes.length + 1}`;
-      const simulatedResult = generateSmartMockTranscription(simulatedTitle, duration);
-      const newNoteId = `local-${Date.now()}`;
-      
-      const newNote: VoiceNote = {
-        id: newNoteId,
-        title: simulatedTitle,
-        createdAt: new Date().toLocaleString("es-ES", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }),
-        duration: duration || 12,
-        audioUrl: localUrl,
-        transcription: simulatedResult,
-        isLocalFallback: true,
-      };
-
-      saveNoteToFirestore(newNote).catch(err => {
-        console.warn("Advertencia: No se pudo autosalvar el respaldo local en la nube:", err);
-      });
-      setSelectedNote(newNote);
-      setManualTitle(""); // Reset manual title
-      
-      setErrorMsg(null);
-      // setIsCookieBlocked - disabled
     } finally {
       setIsProcessing(false);
     }
