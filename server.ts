@@ -242,7 +242,34 @@ app.post("/api/summarize", async (req, res) => {
   try {
     const { prompt } = req.body;
 
-app.post("/api/summarize", async (req, res) => {
+    if (!prompt || typeof prompt !== "string") {
+      return res.status(400).json({ error: "Prompt requerido" });
+    }
+
+    const client = getGeminiClient();
+    const result = await client.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
+
+    const summary = result.text || "";
+    return res.json({ summary });
+
+  } catch (err: any) {
+    console.error("[/api/summarize] Error:", err);
+    return res.status(500).json({ error: "Error generando resumen extendido" });
+  }
+});
+
+// Error handler global
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("Global Error Handler:", err);
+  res.status(err.status || 500).json({ error: err.message || "Error interno del servidor." });
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`API server running on http://0.0.0.0:${PORT}`);
+});
   try {
     const { prompt } = req.body;
 
