@@ -377,7 +377,7 @@ async function downloadAsPDF(note: VoiceNote, extendedSummary: string) {
   if (t?.speakers?.length) {
     drawH2("Participantes");
     nl(2);
-    t.speakers.forEach((s) => drawBullet(s, "👤"));
+    t.speakers.forEach((s) => drawBullet(s, "-"));
     nl();
   }
 
