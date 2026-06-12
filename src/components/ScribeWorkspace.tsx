@@ -816,7 +816,7 @@ Responde de forma directa, profesional y en español. Usa markdown para estructu
             </div>
 
             {/* Vista dinámica de acuerdo al Zoom */}
-            <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-850">
+          <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-850 overflow-y-auto max-h-[600px]">
               {summaryZoom === "tweet" && (
                 <p className="text-xs text-slate-300 italic leading-relaxed">
                   📢 <strong>En Corto:</strong> Transmisión técnica sobre la optimización del backend, coordinando entregas clave dirigidas a la migración estable previa al viernes.
