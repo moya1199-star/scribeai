@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import multer from "multer";
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import fs from "fs";
 
@@ -59,7 +59,6 @@ const upload = multer({
 
 app.use(express.json({ limit: "50mb" }));
 
-// Gemini client (usado solo para el chat)
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI {
   if (!aiClient) {
@@ -119,7 +118,6 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
     const groqApiKey = process.env.GROQ_API_KEY;
     if (!groqApiKey) return res.status(500).json({ error: "GROQ_API_KEY no está configurada." });
 
-    // Guardar audio en disco
     let savedAudioUrl: string | undefined = undefined;
     try {
       const safeName = (req.file.originalname || "grabacion.webm").replace(/[^a-zA-Z0-9.]/g, "_");
@@ -131,7 +129,6 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
       console.error("No se pudo guardar copia de audio:", saveErr);
     }
 
-    // Determinar mimeType
     let mimeType = req.file.mimetype;
     if (mimeType === "application/octet-stream") {
       const ext = path.extname(req.file.originalname || "").toLowerCase();
@@ -141,7 +138,6 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
       else mimeType = "audio/webm";
     }
 
-    // Llamar a Groq Whisper via fetch
     const formData = new FormData();
     const audioBlob = new Blob([req.file.buffer], { type: mimeType });
     const fileName = req.file.originalname || "audio.webm";
@@ -163,7 +159,6 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
 
     const groqData: any = await groqResponse.json();
 
-    // Construir segmentos desde los chunks de Groq
     const segments = (groqData.segments || []).map((s: any, i: number) => ({
       id: `seg-${i}`,
       speaker: `Hablante ${(i % 2) + 1}`,
@@ -173,7 +168,6 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
       sentiment: "neutral" as const,
     }));
 
-    // Generar resumen básico desde el texto completo
     const fullText = groqData.text || "";
     const wordCount = fullText.split(" ").length;
     const summary = fullText.length > 300
@@ -238,6 +232,8 @@ Responde de forma directa y profesional en español. Usa markdown si es necesari
     return res.status(500).json({ error: error.message || "Error en el asistente." });
   }
 });
+
+// POST resumen extendido con Gemini
 app.post("/api/summarize", async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -270,42 +266,3 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`API server running on http://0.0.0.0:${PORT}`);
 });
-  try {
-    const { prompt } = req.body;
-
-    if (!prompt || typeof prompt !== "string") {
-      return res.status(400).json({ error: "Prompt requerido" });
-    }
-
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content: "Eres un asistente especializado en análisis de reuniones. Generas resúmenes ejecutivos extensos y formales en español. Responde ÚNICAMENTE con el contenido solicitado, sin preámbulos.",
-        },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.4,
-      max_tokens: 2048,
-    });
-
-    const summary = completion.choices[0]?.message?.content || "";
-    return res.json({ summary });
-
-  } catch (err) {
-    console.error("[/api/summarize] Error:", err);
-    return res.status(500).json({ error: "Error generando resumen extendido" });
-  }
-});
-
-// Error handler global
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Global Error Handler:", err);
-  res.status(err.status || 500).json({ error: err.message || "Error interno del servidor." });
-});
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`API server running on http://0.0.0.0:${PORT}`);
-});
-
