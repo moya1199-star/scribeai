@@ -1,4 +1,4 @@
-import express from "express";
+import express from "express";import
 import path from "path";
 import multer from "multer";
 import { GoogleGenAI, Type } from "@google/genai";
@@ -236,6 +236,39 @@ Responde de forma directa y profesional en español. Usa markdown si es necesari
   } catch (error: any) {
     console.error("Chat error:", error);
     return res.status(500).json({ error: error.message || "Error en el asistente." });
+  }
+});
+app.post("/api/summarize", async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+app.post("/api/summarize", async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt || typeof prompt !== "string") {
+      return res.status(400).json({ error: "Prompt requerido" });
+    }
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: "Eres un asistente especializado en análisis de reuniones. Generas resúmenes ejecutivos extensos y formales en español. Responde ÚNICAMENTE con el contenido solicitado, sin preámbulos.",
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.4,
+      max_tokens: 2048,
+    });
+
+    const summary = completion.choices[0]?.message?.content || "";
+    return res.json({ summary });
+
+  } catch (err) {
+    console.error("[/api/summarize] Error:", err);
+    return res.status(500).json({ error: "Error generando resumen extendido" });
   }
 });
 

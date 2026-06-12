@@ -1,3 +1,4 @@
+import EnhancedSummaryPanel from "./EnhancedSummaryPanel";
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { 
   CheckCircle2, 
@@ -822,13 +823,11 @@ Responde de forma directa, profesional y en español. Usa markdown para estructu
                 </p>
               )}
               {summaryZoom === "executive" && (
-                <div className="space-y-1.5">
-                  <h5 className="text-[10px] uppercase tracking-widest text-[#F5A623] font-bold">Puntos Críticos</h5>
-                  <p className="text-xs text-slate-200 leading-relaxed font-sans font-medium">
-                    {selectedNote.transcription.summary || "Resumen general pendiente de procesamiento."}
-                  </p>
-                </div>
-              )}
+  <EnhancedSummaryPanel
+    note={selectedNote}
+    apiUrl={import.meta.env.VITE_API_URL}
+  />
+)}
               {summaryZoom === "deep" && (
                 <div className="space-y-2 text-xs text-slate-350 font-sans leading-relaxed">
                   <p>
